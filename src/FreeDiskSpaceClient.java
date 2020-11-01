@@ -7,12 +7,12 @@ import java.net.UnknownHostException;
 public class FreeDiskSpaceClient {
     public static final int PORT = 4711;
     public static final String CHARSET_NAME = "UTF8";
-    private Socket socket;
     private BufferedWriter out;
     private BufferedReader in;
+
     public FreeDiskSpaceClient(String ip, String path) {
-        try {
-            socket = new Socket(ip, PORT);
+        try (Socket socket = new Socket(ip, PORT)) {
+            System.out.printf("Verbunden mit %s: %s%n", ip, PORT);
             out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), CHARSET_NAME));
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             //Anfrage senden
@@ -20,23 +20,23 @@ public class FreeDiskSpaceClient {
             out.newLine();
             out.flush();
             //Antwort
-            String response ="";
+            String response = "";
             response = in.readLine();
-            System.out.println("Antwort:" + response);
-
-        } catch (UnknownHostException uhEx){
-            System.out.println("Verbindung zur übergebenen IP Adresse nicht möglich");
+            System.out.println("Antwort: " + response);
+        } catch (UnknownHostException uhEx) {
+            System.err.println("Verbindung zur übergebenen IP Adresse nicht möglich");
         } catch (SocketException sEx) {
-            System.out.println("Keine Verbindung zum Server möglich");
+            System.err.println("Keine Verbindung zum Server möglich");
         } catch (IOException ioEx) {
-            System.out.println(ioEx);
+            System.err.println(ioEx);
         }
     }
 
     public static void main(String[] args) {
-        if(args.length < 2){
+        if (args.length < 2) {
             System.err.println("Es wurden nicht genug Argumente übergeben: benötigt String<ip> String<Pfad>");
+            System.exit(1);
         }
-        new FreeDiskSpaceClient(args[0],args[1]);
+        new FreeDiskSpaceClient(args[0], args[1]);
     }
 }
